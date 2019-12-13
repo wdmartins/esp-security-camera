@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WiFiClient.h>
+#include <ArduinoOTA.h>
 
 #include "SimStreamer.h"
 #include "OV2640Streamer.h"
@@ -102,6 +103,9 @@ void lcdMessage(String msg)
     }
   #endif
 }
+// OTA Access Point
+const char* ACCESS_POINT_NAME = "ESP8266";
+const char* ACCESS_POINT_PASS = "esp8266";
 
 void setup()
 {
@@ -172,6 +176,30 @@ void setup()
 #ifdef ENABLE_RTSPSERVER
     rtspServer.begin();
 #endif
+
+  // Initialize OTA (Over the air) update
+  ArduinoOTA.setHostname(ACCESS_POINT_NAME);
+  ArduinoOTA.setPassword(ACCESS_POINT_PASS);
+
+  ArduinoOTA.onStart([]() {
+    Serial.println("[OTA]: Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("[OTA]: End");
+  });
+  ArduinoOTA.onProgress([](uint32_t progress, uint32_t total) {
+    Serial.printf("[OTA]: Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("[OTA]: Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("[OTA]: Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("[OTA]: Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("[OTA]: Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("[OTA]: Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("[OTA]: End Failed");
+  });
+  ArduinoOTA.begin();
+  Serial.println("[OTA]: Ready");
 }
 
 CStreamer *streamer;
@@ -180,6 +208,9 @@ WiFiClient client; // FIXME, support multiple clients
 
 void loop()
 {
+  // OTA
+  ArduinoOTA.handle();
+
 #ifdef ENABLE_WEBSERVER
     server.handleClient();
 #endif

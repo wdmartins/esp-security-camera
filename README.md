@@ -11,6 +11,7 @@ To build:
 * Copy include/wifikeys_template.h to include/wifikeys.h
 * Edit wifikeys.h and enter the correct wifi credentilas
 * Rename microRTSP.RENAME_ME (or webserver.RENAME_ME) as main.cpp
+* To build Micro-RTSP server: clone [Micro-RTSP](https://github.com/geeksville/Micro-RTSP) and make it available in esp-security-camera/lib by copying or creating a softlink.
 * Import in platform.io and build
 
 On HA:
